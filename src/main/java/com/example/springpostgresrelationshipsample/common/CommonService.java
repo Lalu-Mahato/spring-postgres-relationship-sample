@@ -8,8 +8,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.springpostgresrelationshipsample.common.dto.AssignRoleToUserDTO;
+import com.example.springpostgresrelationshipsample.common.dto.StudentLikeCourseDTO;
+import com.example.springpostgresrelationshipsample.course.CourseRepository;
+import com.example.springpostgresrelationshipsample.course.entity.Course;
 import com.example.springpostgresrelationshipsample.role.RoleRepository;
 import com.example.springpostgresrelationshipsample.role.entity.Role;
+import com.example.springpostgresrelationshipsample.student.StudentRepository;
+import com.example.springpostgresrelationshipsample.student.entity.Student;
 import com.example.springpostgresrelationshipsample.user.UserRepository;
 import com.example.springpostgresrelationshipsample.user.entity.User;
 
@@ -20,6 +25,12 @@ public class CommonService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private CourseRepository courseRepository;
 
     public ResponseEntity<Object> assignRoleToUser(AssignRoleToUserDTO assignRoleToUserDTO) {
         Optional<User> optUser = userRepository.findById(assignRoleToUserDTO.getUserId());
@@ -36,6 +47,26 @@ public class CommonService {
         Role role = optRole.get();
         user.setRole(role);
         User response = userRepository.save(user);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    public ResponseEntity<Object> studentLikeCourse(StudentLikeCourseDTO studentLikeCourseDTO) {
+        Optional<Student> optStudent = studentRepository.findById(studentLikeCourseDTO.getStudentId());
+        Optional<Course> optCourse = courseRepository.findById(studentLikeCourseDTO.getCourseId());
+
+        if (optStudent.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Student not found");
+        }
+        if (optCourse.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Course not found");
+        }
+
+        Student student = optStudent.get();
+        Course course = optCourse.get();
+
+        student.getLikedCourses().add(course);
+        Student response = studentRepository.save(student);
+
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
