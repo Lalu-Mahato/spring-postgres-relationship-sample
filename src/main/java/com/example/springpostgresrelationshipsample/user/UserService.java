@@ -28,4 +28,8 @@ public class UserService {
         User response = userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    public UserService(UserRepository repository) {
+        this.userRepository = repository;
+    }
 }
